@@ -1,0 +1,5 @@
+{
+  "name": "Privacy Suite Controller",
+  "description": "A web-based controller for Tor, I2P, and Monero nodes with real-time logging and status monitoring.",
+  "requestFramePermissions": []
+}

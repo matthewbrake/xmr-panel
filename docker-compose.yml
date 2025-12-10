@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  controller:
+    build: .
+    container_name: privacy_suite_node
+    restart: unless-stopped
+    ports:
+      # --- WEB INTERFACE ---
+      # Change WEB_PORT in .env to modify (Default: 3000)
+      - "${WEB_PORT:-3000}:3000"
+
+      # --- TOR PORTS ---
+      # SOCKS5 Proxy (Route browser traffic here)
+      - "9050:9050"
+      # Control Port (For Nyx or other controllers)
+      - "9051:9051"
+
+      # --- I2P PORTS ---
+      # HTTP Proxy
+      - "4444:4444"
+      # HTTPS Proxy (Standard I2P port)
+      - "4445:4445"
+      # I2P Control / Console
+      - "7657:7657"
+
+      # --- MONERO PORTS ---
+      # P2P Network (Required for syncing)
+      - "18080:18080"
+      # RPC API (Wallet connection)
+      - "18081:18081"
+      # ZMQ (Optional for advanced integrations)
+      - "18082:18082"
+
+    volumes:
+      # --- STRICT APP ARCHITECTURE ---
+      # Run setup.sh on host first!
+
+      # MONERO
+      - ./app/monero/bin:/app/monero/bin
+      - ./app/monero/config:/app/monero/config
+      - ./app/monero/storage:/app/monero/storage
+
+      # TOR
+      - ./app/tor/bin:/app/tor/bin
+      - ./app/tor/config:/app/tor/config
+      - ./app/tor/storage:/app/tor/storage
+
+      # I2P
+      - ./app/i2p/bin:/app/i2p/bin
+      - ./app/i2p/config:/app/i2p/config
+      - ./app/i2p/storage:/app/i2p/storage
+      
+      # DOCUMENTATION
+      - ./docs:/app/docs
+
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    # Run as default node user for security (UID 1000)
+    user: "1000:1000"
