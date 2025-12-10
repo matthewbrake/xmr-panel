@@ -13,27 +13,48 @@ interface Props {
 const ServiceDetailCard: React.FC<Props> = ({ service, onRefresh, logs }) => {
     const [showInstallModal, setShowInstallModal] = useState(false);
     const [showConsole, setShowConsole] = useState(false);
+    
+    // SMART INSTALL SCRIPT
     const [installScript, setInstallScript] = useState(`#!/bin/bash
-# Auto-generated script for ${service.name}
-# This runs INSIDE the container. 
-# Target Directory is mapped to your HOST machine.
+# ---------------------------------------------------------
+# SMART INSTALLER FOR ${service.name.toUpperCase()}
+# ---------------------------------------------------------
+# 1. Downloads the binary
+# 2. Extracts it
+# 3. LOCATES the specific binary file (${service.paths.binary.split('/').pop()}) 
+#    and moves it to the target folder, regardless of subfolder structure.
 
 TARGET_DIR="$(dirname ${service.paths.binary})"
-echo "Preparing to install to $TARGET_DIR"
+BINARY_NAME="$(basename ${service.paths.binary})"
+
+echo "[*] Target Directory: $TARGET_DIR"
+echo "[*] Binary Name: $BINARY_NAME"
 
 mkdir -p $TARGET_DIR
+cd $TARGET_DIR
 
-# Example for Monero (Uncomment to use)
-# wget -q https://downloads.getmonero.org/cli/linux64 -O monero.tar.bz2
-# tar -xjf monero.tar.bz2 --strip-components=1 -C $TARGET_DIR
+# --- EXAMPLE: MONERO ---
+# URL="https://downloads.getmonero.org/cli/linux64"
+# echo "Downloading Monero..."
+# wget -q -O monero.tar.bz2 $URL
+# echo "Extracting..."
+# tar -xjf monero.tar.bz2
+# echo "Searching for binary..."
+# find . -name "$BINARY_NAME" -type f -exec mv {} . \;
+# chmod +x $BINARY_NAME
 # rm monero.tar.bz2
+# echo "Done!"
 
-echo "Download complete. Binaries are now persistent."`);
+# --- EXAMPLE: TOR ---
+# apt-get update && apt-get install -y tor
+# cp /usr/bin/tor $TARGET_DIR/tor
+
+echo "Please uncomment the section above relevant to your service or paste your own script!"
+`);
 
     const isRunning = service.status === ServiceStatus.RUNNING;
     const isInstalling = service.status === ServiceStatus.INSTALLING;
-    const isValidating = service.status === ServiceStatus.VALIDATING;
-    const isWorking = service.status === ServiceStatus.STARTING || isInstalling || isValidating;
+    const isWorking = service.status === ServiceStatus.STARTING || isInstalling;
 
     const handleInstall = async () => {
         setShowInstallModal(false);
