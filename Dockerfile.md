@@ -1,3 +1,7 @@
+# Dockerfile
+Use this file to build the image manually if you are not using the pre-built image.
+
+```dockerfile
 # Base Image: Lightweight Node.js environment
 FROM node:18-bullseye-slim
 
@@ -30,7 +34,8 @@ RUN mkdir -p /app/monero/bin /app/monero/config /app/monero/storage \
 
 # Install Node Dependencies
 COPY package*.json ./
-RUN npm install --production
+# Install ALL dependencies (including dev tools like Vite)
+RUN npm install
 
 # Copy Application Source
 COPY . .
@@ -48,5 +53,6 @@ USER 1000
 # 18081: Monero RPC
 EXPOSE 3000 9050 9051 4444 18081
 
-# Start the Node.js Controller
+# Start the Node.js Controller (Vite)
 CMD ["npm", "start"]
+```
